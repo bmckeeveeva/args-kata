@@ -25,4 +25,8 @@ public class State {
     boolean isIntArg(char argChar) {
       return intArgs.containsKey(argChar);
     }
+
+    boolean isDoubleArg(char argChar) {
+        return doubleArgs.containsKey(argChar);
+    }
 }

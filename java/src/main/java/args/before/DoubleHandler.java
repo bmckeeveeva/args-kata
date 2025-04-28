@@ -1,15 +1,18 @@
 package args.before;
 
-public class DoubleHandler {
-    public static void parseDoubleSchemaElement(State state, char elementId) {
+public class DoubleHandler implements Handler {
+    @Override
+    public void parseSchemaElement(State state, char elementId) {
         state.doubleArgs.put(elementId, 0.0);
     }
 
-    public boolean isDoubleSchemaElement(String elementTail) {
+    @Override
+    public boolean isSchemaElement(String elementTail) {
         return elementTail.equals("##");
     }
 
-    public static void setDoubleArg(State state, char argChar) throws ArgsException {
+    @Override
+    public void setArg(State state, char argChar) throws ArgsException {
         state.currentArgument++;
         String parameter = null;
         try {
@@ -23,9 +26,5 @@ public class DoubleHandler {
                     String.format("Argument -%c expects a double but was '%s'.", argChar, parameter),
                     ArgsErrorCode.INVALID_DOUBLE);
         }
-    }
-
-    public static boolean isDoubleArg(State state, char argChar) {
-        return state.doubleArgs.containsKey(argChar);
     }
 }

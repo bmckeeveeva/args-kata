@@ -1,15 +1,18 @@
 package args.before;
 
-public class StringHandler {
-    public static void parseStringSchemaElement(State state, char elementId) {
+public class StringHandler implements Handler {
+    @Override
+    public void parseSchemaElement(State state, char elementId) {
         state.stringArgs.put(elementId, "");
     }
 
-    public boolean isStringSchemaElement(String elementTail) {
+    @Override
+    public boolean isSchemaElement(String elementTail) {
         return elementTail.equals("*");
     }
 
-    public static void setStringArg(State state, char argChar) throws ArgsException {
+    @Override
+    public void setArg(State state, char argChar) throws ArgsException {
         state.currentArgument++;
         try {
             state.stringArgs.put(argChar, state.args[state.currentArgument]);

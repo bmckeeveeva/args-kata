@@ -1,18 +1,21 @@
 package args.before;
 
-public class BooleanHandler {
+class BooleanHandler implements Handler {
     public BooleanHandler() {
     }
 
-    static void parseBooleanSchemaElement(State state, char elementId) {
+    @Override
+    public void parseSchemaElement(State state, char elementId) {
         state.booleanArgs.put(elementId, false);
     }
 
-    boolean isBooleanSchemaElement(String elementTail) {
-        return elementTail.length() == 0;
+    @Override
+    public boolean isSchemaElement(String elementTail) {
+        return elementTail.isEmpty();
     }
 
-    static void setBooleanArg(State state, char argChar, boolean value) {
-        state.booleanArgs.put(argChar, value);
+    @Override
+    public void setArg(State state, char argChar) throws ArgsException {
+        state.booleanArgs.put(argChar, true);
     }
 }

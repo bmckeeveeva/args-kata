@@ -1,15 +1,18 @@
 package args.before;
 
-public class IntegerHandler {
-    public static void parseIntegerSchemaElement(State state, char elementId) {
+public class IntegerHandler implements Handler {
+    @Override
+    public void parseSchemaElement(State state, char elementId) {
         state.intArgs.put(elementId, 0);
     }
 
-    public boolean isIntegerSchemaElement(String elementTail) {
+    @Override
+    public boolean isSchemaElement(String elementTail) {
         return elementTail.equals("#");
     }
 
-    public static void setIntArg(State state, char argChar) throws ArgsException {
+    @Override
+    public void setArg(State state, char argChar) throws ArgsException {
         state.currentArgument++;
         String parameter = null;
         try {

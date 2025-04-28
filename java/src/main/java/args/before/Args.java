@@ -51,14 +51,14 @@ public class Args {
     char elementId = element.charAt(0);
     String elementTail = element.substring(1);
     Util.validateSchemaElementId(elementId);
-    if (booleanHandler.isBooleanSchemaElement(elementTail)) {
-      BooleanHandler.parseBooleanSchemaElement(state, elementId);
-    } else if (stringHandler.isStringSchemaElement(elementTail)) {
-      StringHandler.parseStringSchemaElement(state, elementId);
-    } else if (integerHandler.isIntegerSchemaElement(elementTail)) {
-      IntegerHandler.parseIntegerSchemaElement(state, elementId);
-    } else if (doubleHandler.isDoubleSchemaElement(elementTail)) {
-      DoubleHandler.parseDoubleSchemaElement(state, elementId);
+    if (booleanHandler.isSchemaElement(elementTail)) {
+      booleanHandler.parseSchemaElement(state, elementId);
+    } else if (stringHandler.isSchemaElement(elementTail)) {
+      stringHandler.parseSchemaElement(state, elementId);
+    } else if (integerHandler.isSchemaElement(elementTail)) {
+      integerHandler.parseSchemaElement(state, elementId);
+    } else if (doubleHandler.isSchemaElement(elementTail)) {
+      doubleHandler.parseSchemaElement(state, elementId);
     } else {
       throw Util.createArgsError(String.format("'%s' is not a valid argument format.", elementTail),
           ArgsErrorCode.INVALID_ARGUMENT_FORMAT);
@@ -89,13 +89,13 @@ public class Args {
 
   private boolean setArgument(char argChar) throws ArgsException {
     if (state.isBooleanArg(state, argChar)) {
-      BooleanHandler.setBooleanArg(state, argChar, true);
+      booleanHandler.setArg(state, argChar);
     } else if (state.isStringArg(state, argChar)) {
-      StringHandler.setStringArg(state, argChar);
+      stringHandler.setArg(state, argChar);
     } else if (state.isIntArg(argChar)) {
-      IntegerHandler.setIntArg(state, argChar);
-    } else if (DoubleHandler.isDoubleArg(state, argChar)) {
-      DoubleHandler.setDoubleArg(state, argChar);
+      integerHandler.setArg(state, argChar);
+    } else if (state.isDoubleArg(argChar)) {
+      doubleHandler.setArg(state, argChar);
     } else {
       throw Util.createArgsError(String.format("Argument -%c unexpected.", argChar),
           ArgsErrorCode.UNEXPECTED_ARGUMENT);
