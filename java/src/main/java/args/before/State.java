@@ -3,7 +3,7 @@ package args.before;
 import java.util.HashMap;
 import java.util.Map;
 
-public class State {
+class State {
     String schema;
     String[] args;
     Map<Character, Boolean> booleanArgs;
@@ -12,7 +12,7 @@ public class State {
     Map<Character, Double> doubleArgs;
     int currentArgument;
 
-    public State(String schema, String[] args) {
+    State(String schema, String[] args) {
         this.schema = schema;
         this.args = args;
         this.booleanArgs = new HashMap<>();

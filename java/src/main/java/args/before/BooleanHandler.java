@@ -1,9 +1,6 @@
 package args.before;
 
 class BooleanHandler implements Handler {
-    public BooleanHandler() {
-    }
-
     @Override
     public void parseSchemaElement(State state, char elementId, String elementTail) throws ArgsException {
         state.booleanArgs.put(elementId, false);

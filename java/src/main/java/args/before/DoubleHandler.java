@@ -1,6 +1,6 @@
 package args.before;
 
-public class DoubleHandler implements Handler {
+class DoubleHandler implements Handler {
     @Override
     public void parseSchemaElement(State state, char elementId, String elementTail) throws ArgsException {
         state.doubleArgs.put(elementId, 0.0);

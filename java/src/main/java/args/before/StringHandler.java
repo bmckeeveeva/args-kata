@@ -1,6 +1,6 @@
 package args.before;
 
-public class StringHandler implements Handler {
+class StringHandler implements Handler {
     @Override
     public void parseSchemaElement(State state, char elementId, String elementTail) throws ArgsException {
         state.stringArgs.put(elementId, "");

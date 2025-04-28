@@ -1,6 +1,5 @@
 package args.before;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -25,6 +24,7 @@ public class Args {
    */
   public Args(String schema, String[] args) throws ArgsException {
     this.state = new State(schema, args);
+
     parse();
   }
 
