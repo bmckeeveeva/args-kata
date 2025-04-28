@@ -1,5 +1,6 @@
 package args.before;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class State {
@@ -11,22 +12,13 @@ public class State {
     Map<Character, Double> doubleArgs;
     int currentArgument;
 
-    public State() {
-    }
-
-    boolean isStringArg(State state, char argChar) {
-      return state.stringArgs.containsKey(argChar);
-    }
-
-    boolean isBooleanArg(State state, char argChar) {
-      return state.booleanArgs.containsKey(argChar);
-    }
-
-    boolean isIntArg(char argChar) {
-      return intArgs.containsKey(argChar);
-    }
-
-    boolean isDoubleArg(char argChar) {
-        return doubleArgs.containsKey(argChar);
+    public State(String schema, String[] args) {
+        this.schema = schema;
+        this.args = args;
+        this.booleanArgs = new HashMap<>();
+        this.intArgs = new HashMap<>();
+        this.stringArgs = new HashMap<>();
+        this.doubleArgs = new HashMap<>();
+        this.currentArgument = 0;
     }
 }

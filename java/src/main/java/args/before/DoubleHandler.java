@@ -2,7 +2,7 @@ package args.before;
 
 public class DoubleHandler implements Handler {
     @Override
-    public void parseSchemaElement(State state, char elementId) {
+    public void parseSchemaElement(State state, char elementId, String elementTail) throws ArgsException {
         state.doubleArgs.put(elementId, 0.0);
     }
 
@@ -26,5 +26,10 @@ public class DoubleHandler implements Handler {
                     String.format("Argument -%c expects a double but was '%s'.", argChar, parameter),
                     ArgsErrorCode.INVALID_DOUBLE);
         }
+    }
+
+    @Override
+    public boolean isSupportedArg(State state, char argChar) {
+        return state.doubleArgs.containsKey(argChar);
     }
 }

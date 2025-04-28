@@ -1,16 +1,20 @@
 package args.before;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Args parses CLI args.
  */
 public class Args {
-  private final State state = new State();
-  private final BooleanHandler booleanHandler = new BooleanHandler();
-  private final IntegerHandler integerHandler = new IntegerHandler();
-  private final StringHandler stringHandler = new StringHandler();
-  private final DoubleHandler doubleHandler = new DoubleHandler();
+  private final static List<Handler> HANDLERS = List.of(
+          new BooleanHandler(),
+          new IntegerHandler(),
+          new StringHandler(),
+          new DoubleHandler(),
+          new ErrorCaseHandler());
+
+  private final State state;
 
   /**
    * Args Constructor.
@@ -20,24 +24,21 @@ public class Args {
    * @throws ArgsException if there is a problem parsing the args
    */
   public Args(String schema, String[] args) throws ArgsException {
-    this.state.schema = schema;
-    this.state.args = args;
-    this.state.booleanArgs = new HashMap<>();
-    this.state.intArgs = new HashMap<>();
-    this.state.stringArgs = new HashMap<>();
-    this.state.doubleArgs = new HashMap<>();
-    this.state.currentArgument = 0;
+    this.state = new State(schema, args);
     parse();
   }
 
   private void parse() throws ArgsException {
-    if (state.schema.length() == 0) {
+    if (state.schema.isEmpty()) {
       return;
     }
+
     parseSchema();
+
     if (state.args.length == 0) {
       return;
     }
+
     parseArguments();
   }
 
@@ -51,26 +52,20 @@ public class Args {
     char elementId = element.charAt(0);
     String elementTail = element.substring(1);
     Util.validateSchemaElementId(elementId);
-    if (booleanHandler.isSchemaElement(elementTail)) {
-      booleanHandler.parseSchemaElement(state, elementId);
-    } else if (stringHandler.isSchemaElement(elementTail)) {
-      stringHandler.parseSchemaElement(state, elementId);
-    } else if (integerHandler.isSchemaElement(elementTail)) {
-      integerHandler.parseSchemaElement(state, elementId);
-    } else if (doubleHandler.isSchemaElement(elementTail)) {
-      doubleHandler.parseSchemaElement(state, elementId);
-    } else {
-      throw Util.createArgsError(String.format("'%s' is not a valid argument format.", elementTail),
-          ArgsErrorCode.INVALID_ARGUMENT_FORMAT);
+
+    for (Handler handler : HANDLERS) {
+      if (handler.isSchemaElement(elementTail)) {
+        handler.parseSchemaElement(state, elementId, elementTail);
+        return;
+      }
     }
   }
 
-  private boolean parseArguments() throws ArgsException {
+  private void parseArguments() throws ArgsException {
     for (state.currentArgument = 0; state.currentArgument < state.args.length; state.currentArgument++) {
       String arg = state.args[state.currentArgument];
       parseArgument(arg);
     }
-    return true;
   }
 
   private void parseArgument(String arg) throws ArgsException {
@@ -87,20 +82,13 @@ public class Args {
     }
   }
 
-  private boolean setArgument(char argChar) throws ArgsException {
-    if (state.isBooleanArg(state, argChar)) {
-      booleanHandler.setArg(state, argChar);
-    } else if (state.isStringArg(state, argChar)) {
-      stringHandler.setArg(state, argChar);
-    } else if (state.isIntArg(argChar)) {
-      integerHandler.setArg(state, argChar);
-    } else if (state.isDoubleArg(argChar)) {
-      doubleHandler.setArg(state, argChar);
-    } else {
-      throw Util.createArgsError(String.format("Argument -%c unexpected.", argChar),
-          ArgsErrorCode.UNEXPECTED_ARGUMENT);
+  private void setArgument(char argChar) throws ArgsException {
+    for (Handler handler : HANDLERS) {
+      if (handler.isSupportedArg(state, argChar)) {
+        handler.setArg(state, argChar);
+        return;
+      }
     }
-    return true;
   }
 
   public String getString(char arg) {

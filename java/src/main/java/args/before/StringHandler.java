@@ -2,7 +2,7 @@ package args.before;
 
 public class StringHandler implements Handler {
     @Override
-    public void parseSchemaElement(State state, char elementId) {
+    public void parseSchemaElement(State state, char elementId, String elementTail) throws ArgsException {
         state.stringArgs.put(elementId, "");
     }
 
@@ -20,5 +20,10 @@ public class StringHandler implements Handler {
             throw Util.createArgsError(String.format("Could not find string parameter for -%c.", argChar),
                     ArgsErrorCode.MISSING_STRING);
         }
+    }
+
+    @Override
+    public boolean isSupportedArg(State state, char argChar) {
+        return state.stringArgs.containsKey(argChar);
     }
 }

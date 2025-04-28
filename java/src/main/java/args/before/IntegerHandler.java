@@ -2,7 +2,7 @@ package args.before;
 
 public class IntegerHandler implements Handler {
     @Override
-    public void parseSchemaElement(State state, char elementId) {
+    public void parseSchemaElement(State state, char elementId, String elementTail) throws ArgsException {
         state.intArgs.put(elementId, 0);
     }
 
@@ -26,5 +26,10 @@ public class IntegerHandler implements Handler {
                     String.format("Argument -%c expects an integer but was '%s'.", argChar, parameter),
                     ArgsErrorCode.INVALID_INTEGER);
         }
+    }
+
+    @Override
+    public boolean isSupportedArg(State state, char argChar) {
+        return state.intArgs.containsKey(argChar);
     }
 }
