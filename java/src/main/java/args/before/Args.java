@@ -1,19 +1,16 @@
 package args.before;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Args parses CLI args.
  */
 public class Args {
-  private String schema;
-  private String[] args;
-  private Map<Character, Boolean> booleanArgs;
-  private Map<Character, Integer> intArgs;
-  private Map<Character, String> stringArgs;
-  private Map<Character, Double> doubleArgs;
-  private int currentArgument;
+  private final State state = new State();
+  private final BooleanHandler booleanHandler = new BooleanHandler();
+  private final IntegerHandler integerHandler = new IntegerHandler();
+  private final StringHandler stringHandler = new StringHandler();
+  private final DoubleHandler doubleHandler = new DoubleHandler();
 
   /**
    * Args Constructor.
@@ -23,29 +20,29 @@ public class Args {
    * @throws ArgsException if there is a problem parsing the args
    */
   public Args(String schema, String[] args) throws ArgsException {
-    this.schema = schema;
-    this.args = args;
-    this.booleanArgs = new HashMap<>();
-    this.intArgs = new HashMap<>();
-    this.stringArgs = new HashMap<>();
-    this.doubleArgs = new HashMap<>();
-    this.currentArgument = 0;
+    this.state.schema = schema;
+    this.state.args = args;
+    this.state.booleanArgs = new HashMap<>();
+    this.state.intArgs = new HashMap<>();
+    this.state.stringArgs = new HashMap<>();
+    this.state.doubleArgs = new HashMap<>();
+    this.state.currentArgument = 0;
     parse();
   }
 
   private void parse() throws ArgsException {
-    if (schema.length() == 0) {
+    if (state.schema.length() == 0) {
       return;
     }
     parseSchema();
-    if (args.length == 0) {
+    if (state.args.length == 0) {
       return;
     }
     parseArguments();
   }
 
   private void parseSchema() throws ArgsException {
-    for (String element : schema.split(",")) {
+    for (String element : state.schema.split(",")) {
       parseSchemaElement(element.trim());
     }
   }
@@ -53,69 +50,24 @@ public class Args {
   private void parseSchemaElement(String element) throws ArgsException {
     char elementId = element.charAt(0);
     String elementTail = element.substring(1);
-    validateSchemaElementId(elementId);
-    if (isBooleanSchemaElement(elementTail)) {
-      parseBooleanSchemaElement(elementId);
-    } else if (isStringSchemaElement(elementTail)) {
-      parseStringSchemaElement(elementId);
-    } else if (isIntegerSchemaElement(elementTail)) {
-      parseIntegerSchemaElement(elementId);
-    } else if (isDoubleSchemaElement(elementTail)) {
-      parseDoubleSchemaElement(elementId);
+    Util.validateSchemaElementId(elementId);
+    if (booleanHandler.isBooleanSchemaElement(elementTail)) {
+      BooleanHandler.parseBooleanSchemaElement(state, elementId);
+    } else if (stringHandler.isStringSchemaElement(elementTail)) {
+      StringHandler.parseStringSchemaElement(state, elementId);
+    } else if (integerHandler.isIntegerSchemaElement(elementTail)) {
+      IntegerHandler.parseIntegerSchemaElement(state, elementId);
+    } else if (doubleHandler.isDoubleSchemaElement(elementTail)) {
+      DoubleHandler.parseDoubleSchemaElement(state, elementId);
     } else {
-      throw createArgsError(String.format("'%s' is not a valid argument format.", elementTail),
+      throw Util.createArgsError(String.format("'%s' is not a valid argument format.", elementTail),
           ArgsErrorCode.INVALID_ARGUMENT_FORMAT);
     }
   }
 
-  private void validateSchemaElementId(char elementId) throws ArgsException {
-    if (!Character.isLetter(elementId)) {
-      throw createArgsError(String.format("'%c' is not a valid argument name.", elementId),
-          ArgsErrorCode.INVALID_ARGUMENT_NAME);
-    }
-  }
-
-  private ArgsException createArgsError(String msg, ArgsErrorCode code) {
-    ArgsException err = new ArgsException(msg);
-    err.setErrorCode(code);
-    return err;
-  }
-
-  private void parseBooleanSchemaElement(char elementId) {
-    booleanArgs.put(elementId, false);
-  }
-
-  private void parseIntegerSchemaElement(char elementId) {
-    intArgs.put(elementId, 0);
-  }
-
-  private void parseStringSchemaElement(char elementId) {
-    stringArgs.put(elementId, "");
-  }
-
-  private void parseDoubleSchemaElement(char elementId) {
-    doubleArgs.put(elementId, 0.0);
-  }
-
-  private boolean isStringSchemaElement(String elementTail) {
-    return elementTail.equals("*");
-  }
-
-  private boolean isBooleanSchemaElement(String elementTail) {
-    return elementTail.length() == 0;
-  }
-
-  private boolean isIntegerSchemaElement(String elementTail) {
-    return elementTail.equals("#");
-  }
-
-  private boolean isDoubleSchemaElement(String elementTail) {
-    return elementTail.equals("##");
-  }
-
   private boolean parseArguments() throws ArgsException {
-    for (currentArgument = 0; currentArgument < args.length; currentArgument++) {
-      String arg = args[currentArgument];
+    for (state.currentArgument = 0; state.currentArgument < state.args.length; state.currentArgument++) {
+      String arg = state.args[state.currentArgument];
       parseArgument(arg);
     }
     return true;
@@ -123,7 +75,7 @@ public class Args {
 
   private void parseArgument(String arg) throws ArgsException {
     if (!arg.startsWith("-")) {
-      throw createArgsError(String.format("'%s' is not a valid argument format.", arg),
+      throw Util.createArgsError(String.format("'%s' is not a valid argument format.", arg),
           ArgsErrorCode.INVALID_ARGUMENT_FORMAT);
     }
     parseElements(arg);
@@ -136,96 +88,34 @@ public class Args {
   }
 
   private boolean setArgument(char argChar) throws ArgsException {
-    if (isBooleanArg(argChar)) {
-      setBooleanArg(argChar, true);
-    } else if (isStringArg(argChar)) {
-      setStringArg(argChar);
-    } else if (isIntArg(argChar)) {
-      setIntArg(argChar);
-    } else if (isDoubleArg(argChar)) {
-      setDoubleArg(argChar);
+    if (state.isBooleanArg(state, argChar)) {
+      BooleanHandler.setBooleanArg(state, argChar, true);
+    } else if (state.isStringArg(state, argChar)) {
+      StringHandler.setStringArg(state, argChar);
+    } else if (state.isIntArg(argChar)) {
+      IntegerHandler.setIntArg(state, argChar);
+    } else if (DoubleHandler.isDoubleArg(state, argChar)) {
+      DoubleHandler.setDoubleArg(state, argChar);
     } else {
-      throw this.createArgsError(String.format("Argument -%c unexpected.", argChar),
+      throw Util.createArgsError(String.format("Argument -%c unexpected.", argChar),
           ArgsErrorCode.UNEXPECTED_ARGUMENT);
     }
     return true;
   }
 
-  private boolean isIntArg(char argChar) {
-    return intArgs.containsKey(argChar);
-  }
-
-  private void setIntArg(char argChar) throws ArgsException {
-    currentArgument++;
-    String parameter = null;
-    try {
-      parameter = args[currentArgument];
-      intArgs.put(argChar, Integer.parseInt(parameter));
-    } catch (ArrayIndexOutOfBoundsException e) {
-      throw createArgsError(String.format("Could not find integer parameter for -%c.", argChar),
-          ArgsErrorCode.MISSING_INTEGER);
-    } catch (NumberFormatException e) {
-      throw createArgsError(
-          String.format("Argument -%c expects an integer but was '%s'.", argChar, parameter),
-          ArgsErrorCode.INVALID_INTEGER);
-    }
-  }
-
-  private void setStringArg(char argChar) throws ArgsException {
-    currentArgument++;
-    try {
-      stringArgs.put(argChar, args[currentArgument]);
-    } catch (ArrayIndexOutOfBoundsException e) {
-      throw createArgsError(String.format("Could not find string parameter for -%c.", argChar),
-          ArgsErrorCode.MISSING_STRING);
-    }
-  }
-
-  private boolean isStringArg(char argChar) {
-    return stringArgs.containsKey(argChar);
-  }
-
-  private void setBooleanArg(char argChar, boolean value) {
-    booleanArgs.put(argChar, value);
-  }
-
-  private boolean isBooleanArg(char argChar) {
-    return booleanArgs.containsKey(argChar);
-  }
-
-  private void setDoubleArg(char argChar) throws ArgsException {
-    currentArgument++;
-    String parameter = null;
-    try {
-      parameter = args[currentArgument];
-      doubleArgs.put(argChar, Double.parseDouble(parameter));
-    } catch (ArrayIndexOutOfBoundsException e) {
-      throw createArgsError(String.format("Could not find double parameter for -%c.", argChar),
-          ArgsErrorCode.MISSING_DOUBLE);
-    } catch (NumberFormatException e) {
-      throw createArgsError(
-          String.format("Argument -%c expects a double but was '%s'.", argChar, parameter),
-          ArgsErrorCode.INVALID_DOUBLE);
-    }
-  }
-
-  private boolean isDoubleArg(char argChar) {
-    return doubleArgs.containsKey(argChar);
-  }
-
   public String getString(char arg) {
-    return stringArgs.get(arg);
+    return state.stringArgs.get(arg);
   }
 
   public int getInt(char arg) {
-    return intArgs.get(arg);
+    return state.intArgs.get(arg);
   }
 
   public boolean getBoolean(char arg) {
-    return booleanArgs.get(arg);
+    return state.booleanArgs.get(arg);
   }
 
   public double getDouble(char arg) {
-    return doubleArgs.get(arg);
+    return state.doubleArgs.get(arg);
   }
 }
