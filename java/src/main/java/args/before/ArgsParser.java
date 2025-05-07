@@ -1,26 +1,17 @@
 package args.before;
 
-import java.util.List;
-
 /**
  * Args parses CLI args.
  */
-public class ArgsFactory {
-  private final static List<Handler> HANDLERS = List.of(
-          new BooleanHandler(),
-          new IntegerHandler(),
-          new StringHandler(),
-          new DoubleHandler(),
-          new ErrorCaseHandler());
+public class ArgsParser {
+  private final State state;
 
-  public Args parse(String schema, String[] args) throws ArgsException {
-    State state = new State(schema, args);
+  ArgsParser(State state) {
+    this.state = state;
+  }
 
-    if (state.schema.isEmpty()) {
-       return state;
-    }
-
-    parseSchema(state);
+  public Args parse(String[] args) throws ArgsException {
+    state.args = args;
 
     if (state.args.length == 0) {
       return state;
@@ -29,25 +20,6 @@ public class ArgsFactory {
     parseArguments(state);
 
     return state;
-  }
-
-  private void parseSchema(State state) throws ArgsException {
-    for (String element : state.schema.split(",")) {
-      parseSchemaElement(state, element.trim());
-    }
-  }
-
-  private void parseSchemaElement(State state, String element) throws ArgsException {
-    char elementId = element.charAt(0);
-    String elementTail = element.substring(1);
-    Util.validateSchemaElementId(elementId);
-
-    for (Handler handler : HANDLERS) {
-      if (handler.isSchemaElement(elementTail)) {
-        handler.parseSchemaElement(state, elementId, elementTail);
-        return;
-      }
-    }
   }
 
   private void parseArguments(State state) throws ArgsException {
@@ -72,7 +44,7 @@ public class ArgsFactory {
   }
 
   private void setArgument(State state, char argChar) throws ArgsException {
-    for (Handler handler : HANDLERS) {
+    for (Handler handler : Handler.HANDLERS) {
       if (handler.isSupportedArg(state, argChar)) {
         handler.setArg(state, argChar);
         return;

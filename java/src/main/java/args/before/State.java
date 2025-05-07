@@ -12,9 +12,8 @@ class State implements Args {
     Map<Character, Double> doubleArgs;
     int currentArgument;
 
-    State(String schema, String[] args) {
+    State(String schema) {
         this.schema = schema;
-        this.args = args;
         this.booleanArgs = new HashMap<>();
         this.intArgs = new HashMap<>();
         this.stringArgs = new HashMap<>();

@@ -9,12 +9,12 @@ import org.testng.annotations.Test;
 /**
  * Unit tests for Args before refactoring. You should not modify this class when completing the kata
  */
-public class ArgsFactoryTest {
+public class ArgsParserTest {
   @Test
   public void getMethods_validSchemaValidArgs() throws Exception {
     String schema = "i#,b,d##,s*";
     String[] args = {"-i", "10", "-b", "-d", "1.1", "-s", "something"};
-    Args sut = new ArgsFactory().parse(schema, args);
+    Args sut = new SchemaParser().parse(schema).parse(args);
 
     String strArg = sut.getString('s');
     assertEquals(strArg, "something",
@@ -34,7 +34,7 @@ public class ArgsFactoryTest {
   public void getMethods_reorderedValidSchemaValidArgs() throws Exception {
     String schema = "i#,b,d##,s*";
     String[] args = {"-b", "-d", "1.1", "-s", "something", "-i", "10"};
-    Args sut = new ArgsFactory().parse(schema, args);
+    Args sut = new SchemaParser().parse(schema).parse(args);
 
     String strArg = sut.getString('s');
     assertEquals(strArg, "something",
@@ -54,7 +54,7 @@ public class ArgsFactoryTest {
   public void getMethods_validSchemaNoArgs() throws Exception {
     String schema = "i#,b,d##,s*";
     String[] args = {};
-    Args sut = new ArgsFactory().parse(schema, args);
+    Args sut = new SchemaParser().parse(schema).parse(args);
 
     String strArg = sut.getString('s');
     assertEquals(strArg, "", "should return the default \"\" when asked about the string argument");
@@ -70,7 +70,7 @@ public class ArgsFactoryTest {
   private void testThrowArgsException(String schema, String[] args, String expectedMsg,
       ArgsErrorCode expectedCode) {
     try {
-      new ArgsFactory().parse(schema, args);
+      new SchemaParser().parse(schema).parse(args);
     } catch (ArgsException e) {
       assertEquals(e.errorMessage(), expectedMsg);
       assertEquals(e.getErrorCode(), expectedCode);
@@ -157,7 +157,7 @@ public class ArgsFactoryTest {
     String schema = "";
     String[] args = {};
     try {
-      new ArgsFactory().parse(schema, args);
+      new SchemaParser().parse(schema).parse(args);
     } catch (Throwable e) {
       fail("Should not throw given empty schema and no arguments", e);
     }
